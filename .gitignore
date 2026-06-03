@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Environment variables
+.env
+
+# dbt
+target/
+dbt_packages/
+logs/
+
+# Docker/database local files
+postgres-data/
+metabase-data/
+
+# OS/editor files
+.DS_Store
+.vscode/
