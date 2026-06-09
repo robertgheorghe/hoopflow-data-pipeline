@@ -11,6 +11,7 @@ venv/
 target/
 dbt_packages/
 logs/
+dbt/.user.yml
 
 # Docker/database local files
 postgres-data/

@@ -3,4 +3,5 @@ python-dotenv
 psycopg2-binary
 pandas
 prefect
-dbt-postgres
+dbt-core==1.10.22
+dbt-postgres==1.10.0

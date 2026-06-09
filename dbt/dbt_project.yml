@@ -1,0 +1,16 @@
+name: "hoopflow"
+version: "1.0.0"
+config-version: 2
+
+profile: "hoopflow"
+
+model-paths: ["models"]
+
+models:
+  hoopflow:
+    staging:
+      +schema: staging
+      +materialized: view
+    marts:
+      +schema: marts
+      +materialized: table
