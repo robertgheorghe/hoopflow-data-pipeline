@@ -1,0 +1,73 @@
+version: 2
+
+models:
+  - name: stg_teams
+    description: "Current NBA teams cleaned from the raw teams source."
+
+    columns:
+      - name: team_id
+        description: "Unique team identifier from BALLDONTLIE."
+        data_tests:
+          - not_null
+          - unique
+
+      - name: abbreviation
+        description: "Short team abbreviation, such as BOS or LAL."
+        data_tests:
+          - not_null
+
+      - name: conference
+        description: "NBA conference for the team."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["East", "West"]
+                
+  - name: stg_games
+    description: "Completed NBA games cleaned from the raw games source."
+    columns:
+      - name: game_id
+        description: "Unique game identifier from BALLDONTLIE."
+        data_tests:
+          - not_null
+          - unique
+
+      - name: game_date
+        description: "Date on which the game was played."
+        data_tests:
+          - not_null
+
+      - name: season
+        description: "NBA season start year."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [2023]
+
+      - name: status
+        description: "Status of the game."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["Final"]
+
+      - name: home_team_id
+        description: "Identifier of the home team."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_teams')
+                field: team_id
+
+      - name: visitor_team_id
+        description: "Identifier of the visiting team."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_teams')
+                field: team_id
