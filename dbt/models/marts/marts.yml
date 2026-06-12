@@ -1,0 +1,56 @@
+version: 2
+
+models:
+  - name: team_season_phase_summary
+    description: "Team performance statistics by NBA season and competition phase, excluding play-in games."
+
+    columns:
+      - name: team_id
+        description: "Unique BALLDONTLIE identifier for the team."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_teams')
+                field: team_id
+
+      - name: full_name
+        description: "Full team name."
+        data_tests:
+          - not_null
+
+      - name: season
+        description: "NBA season start year."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [2023]
+
+      - name: season_phase
+        description: "Competition phase included in the summary."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["regular_season", "postseason"]
+
+      - name: games_played
+        description: "Number of games played by the team in this phase."
+        data_tests:
+          - not_null
+
+      - name: wins
+        description: "Number of games won."
+        data_tests:
+          - not_null
+
+      - name: losses
+        description: "Number of games lost."
+        data_tests:
+          - not_null
+
+      - name: win_percentage
+        description: "Wins divided by games played, represented between 0 and 1."
+        data_tests:
+          - not_null
