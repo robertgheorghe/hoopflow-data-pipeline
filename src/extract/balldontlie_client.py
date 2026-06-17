@@ -13,6 +13,9 @@ TEAMS_URL = "https://api.balldontlie.io/v1/teams"
 GAMES_URL = "https://api.balldontlie.io/v1/games"
 API_KEY_ENV_VAR = "BALLDONTLIE_API_KEY"
 REQUEST_DELAY_SECONDS = 13
+MAX_RATE_LIMIT_RETRIES = 5
+RATE_LIMIT_BUFFER_SECONDS = 2
+DEFAULT_RATE_LIMIT_SLEEP_SECONDS = 15
 
 
 def _get_headers():
@@ -55,23 +58,34 @@ def fetch_games(season=2023, per_page=100):
         if cursor:
             params["cursor"] = cursor
 
-        try:
-            response = requests.get(GAMES_URL, headers=headers, params=params)
+        response = None
+        for attempt in range(1, MAX_RATE_LIMIT_RETRIES + 1):
+            try:
+                response = requests.get(GAMES_URL, headers=headers, params=params)
 
-            if response.status_code == 429:
+                if response.status_code != 429:
+                    response.raise_for_status()
+                    break
+
                 retry_after = response.headers.get("Retry-After")
-                message = "BALLDONTLIE rate limit hit while fetching games."
-                if retry_after:
-                    message += f" Try again after {retry_after} seconds."
-                raise RuntimeError(message)
+                try:
+                    sleep_seconds = int(retry_after) + RATE_LIMIT_BUFFER_SECONDS
+                except (TypeError, ValueError):
+                    sleep_seconds = DEFAULT_RATE_LIMIT_SLEEP_SECONDS
 
-            response.raise_for_status()
-        except requests.RequestException as error:
-            status_code = getattr(error.response, "status_code", "unknown")
-            raise RuntimeError(
-                f"BALLDONTLIE games request failed with status {status_code}. "
-                "Check your API key, rate limits, and internet connection."
-            ) from error
+                if attempt == MAX_RATE_LIMIT_RETRIES:
+                    raise RuntimeError(
+                        "BALLDONTLIE rate limit persisted while fetching games "
+                        f"after {MAX_RATE_LIMIT_RETRIES} attempts."
+                    )
+
+                time.sleep(sleep_seconds)
+            except requests.RequestException as error:
+                status_code = getattr(error.response, "status_code", "unknown")
+                raise RuntimeError(
+                    f"BALLDONTLIE games request failed with status {status_code}. "
+                    "Check your API key, rate limits, and internet connection."
+                ) from error
 
         response_data = response.json()
         games.extend(response_data["data"])

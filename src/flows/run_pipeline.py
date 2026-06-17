@@ -3,6 +3,7 @@
 import argparse
 import os
 import subprocess
+import sys
 from pathlib import Path
 
 from prefect import flow, get_run_logger, task
@@ -50,8 +51,8 @@ def hoopflow_pipeline(refresh_raw: bool = False):
     logger = get_run_logger()
 
     if refresh_raw:
-        run_command(["python", "src/load/load_teams.py"], "load teams")
-        run_command(["python", "src/load/load_games.py"], "load games")
+        run_command([sys.executable, "src/load/load_teams.py"], "load teams")
+        run_command([sys.executable, "src/load/load_games.py"], "load games")
     else:
         logger.info("Skipping raw API ingestion. Use --refresh-raw to run it.")
 
